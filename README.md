@@ -1,24 +1,38 @@
 # TDS_3x
 
-TDS_3x is an open source library to remotely control some Oscilloscopes from Tektronix.
+**TDS_3x** is an open source library to remotely control some Oscilloscopes from **Tektronix**.
 
-It has been tested with a TDS 3014C and a DPO 3014.
+## Informations
 
-Suggested Python version : 3.8
-See requirements.txt for other libraries. (Also included the version I was working with)
+It has been tested with a **TDS 3014C** and a **DPO 3014**.
 
-Please, have a look at the documentation https://mcxiv-python.000webhostapp.com/ (Didn't find a way to use sphinx.autodoc and ReadTheDoc, that's why...)
+**Suggested Python version : 3.8**
+
+See **requirements.txt** for other libraries. (Also included the version I was working with)
+
+Please, have a look at the documentation **https://mcxiv-python.000webhostapp.com/** (Didn't find a way to use sphinx.autodoc and ReadTheDoc, that's why...)
 
 
+## Usage
 
-Quick usage to take a screenshot :
+```python
+from TDS_3x import *
+
+#Quick usage to take a screenshot :
 
 TDSwfm('IpAdress', 'CH1', '', '0').savefig('test.png')
 
-Quick usage to show a live feed :
+#Quick usage to show a live feed :
 
 TDSwfm_live('IpAdress', 'CH1', '', '0')
 
-Quick usage to get the trigger state :
+#Quick usage to get the trigger state :
 
 TDSwfm_trig('IpAdress')
+```
+
+## Contributing
+Pull requests are welcome.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
