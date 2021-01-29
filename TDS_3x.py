@@ -67,18 +67,18 @@ def TDSwfm(ip, channel, arg, wtrace):
     ##########save trace#################
     seed = str(datetime.now()).replace(' ', '_').replace('-', '').replace(':', '').replace('.', '').split('_')[1]
     if wtrace == '1':
-        param = open("trace_"+seed+".txt", "w+")
-        param.write(trace)
-        param.close()
-    if wtrace == '1*':
         try:
-            param = open("./TRACE/trace_"+seed+".txt", "w+")
+            param = open("./TRACE/trace_" + seed + ".txt", "w+")
             param.write(trace)
             param.close()
         except:
             param = open("trace_" + seed + ".txt", "w+")
             param.write(trace)
             param.close()
+    if wtrace == '1*':
+        param = open("trace_" + seed + ".txt", "w+")
+        param.write(trace)
+        param.close()
         return seed
     #####################################
     wfm_data = wfm_data.split(',')
@@ -185,7 +185,7 @@ def TDSwfm_live(ip, channel, arg, trace):
     :Example:
         .. code-block:: python
 
-            TDSwfm_live('192.168.x.x', 'CH1', 'cursorHV', '0')
+            TDSwfm_live('192.168.x.x', 'CH1', 'cursorHV')
 
         *will show the live feed*
 
@@ -193,7 +193,6 @@ def TDSwfm_live(ip, channel, arg, trace):
             :align: center
 
     .. note:: Can only show one channel at a time. Requires NumPy and OpenCV
-    .. warning:: Do **not** use arg 1* in *trace*
     """
     while True:
         TDSwfm(ip, channel, arg, trace).savefig('TektroPyx_live.png')
