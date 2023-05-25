@@ -1,11 +1,20 @@
+# -*- coding: utf-8 -*-
+# --------------------------------------------------
+# TDS_3x - A tektronix TDS 3x series oscilloscope wrapper
+# Quentin Dufournet, 2023
+# --------------------------------------------------
+# Built-in
+from datetime import datetime
+
+# 3rd party
 import matplotlib.pyplot as plt
 import vxi11
 import cv2
 import numpy as np
-from datetime import datetime
+
 
 def TDSwfm(ip, channel, arg, wtrace):
-    """Return the waveform currently displaying on the oscilloscope
+    """ Return the waveform currently displaying on the oscilloscope
 
     :param ip: IP Address of the oscilloscope
     :type ip: str
@@ -19,17 +28,17 @@ def TDSwfm(ip, channel, arg, wtrace):
     :rtype: *pyplot object*
     :Example:
         .. code-block:: python
-        
+
             TDSwfm('192.168.x.x', 'CH1', 'cursorHV', '0').show()
-    
+
         *will show the waveform*
-        
+
         .. code-block:: python
-        
+
             TDSwfm('192.168.x.x', 'CH2', 'qm cursorHV', '1').savefig('TektroPyx.png')
-    
+
         *will save the waveform as "TektroPyx.png" but also as a *.txt* file*
-        
+
         .. image:: ../images/TDS_3x_wfm.png
             :align: center
         .. image:: ../images/TDS_3x_gif.gif
@@ -38,11 +47,12 @@ def TDSwfm(ip, channel, arg, wtrace):
     .. note:: Can only show one channel at a time
     .. warning:: **For EVERY functions, DELAY MODE must be DISABLED !!**
     """
-    instr =  vxi11.Instrument(ip)
+
+    instr = vxi11.Instrument(ip)
     EOL = '\n'
     trace = ''
 
-    instr.write("DATa:SOUrce "+ channel + EOL)
+    instr.write("DATa:SOUrce " + channel + EOL)
     instr.write("DATa:ENCDG ASCIi"+EOL)
     instr.write("DATA:WIDth 1"+EOL)
     instr.write("DATA:START 1"+EOL)
@@ -64,8 +74,9 @@ def TDSwfm(ip, channel, arg, wtrace):
     trace = trace + str(Hpos) + '\n'
     wfm_data = instr.ask("CURVe?"+EOL)
     trace = trace + str(wfm_data) + '\n'
-    ##########save trace#################
-    seed = str(datetime.now()).replace(' ', '_').replace('-', '').replace(':', '').replace('.', '').split('_')[1]
+    ########## save trace #################
+    seed = str(datetime.now()).replace(' ', '_').replace(
+        '-', '').replace(':', '').replace('.', '').split('_')[1]
     if wtrace == '1':
         try:
             param = open("./TRACE/trace_" + seed + ".txt", "w+")
@@ -91,10 +102,10 @@ def TDSwfm(ip, channel, arg, wtrace):
     for point in wfm_data:
         y.append((YZE + (YMU*(int(point)-YOF)))+(Zpos*Vdiv))
         x.append(i)
-        i+=1
+        i += 1
 
     if 'qm' in arg:
-        ###############design qm + qm############
+        ############### design qm + qm ############
         instr.write('measurement:immed:source ' + channel)
         instr.write('measurement:immed:type rms')
         rms = float(instr.ask('measurement:immed:value?'+EOL))
@@ -106,13 +117,13 @@ def TDSwfm(ip, channel, arg, wtrace):
         freq = float(instr.ask('measurement:immed:value?'+EOL))
         instr.write('measurement:immed:type pduty')
         rcy = float(instr.ask('measurement:immed:value?'+EOL))
-        plt.scatter(5000, 0, c = 'black', marker = 'o', s = 1, label = 'RMS : ' + str(rms))
-        plt.scatter(5000, 0, c = 'black', marker = 'o', s = 1, label = 'AMP : ' + str(amp))
-        plt.scatter(5000, 0, c = 'black', marker = 'o', s = 1, label = 'MEAN : ' + str(mean))
-        plt.scatter(5000, 0, c = 'black', marker = 'o', s = 1, label = 'FREQ : ' + str(freq))
-        plt.scatter(5000, 0, c = 'black', marker = 'o', s = 1, label = 'DCY : ' + str(rcy))
+        plt.scatter(5000, 0, c='black', marker='o', s=1, label='RMS : ' + str(rms))
+        plt.scatter(5000, 0, c='black', marker='o', s=1, label='AMP : ' + str(amp))
+        plt.scatter(5000, 0, c='black', marker='o', s=1, label='MEAN : ' + str(mean))
+        plt.scatter(5000, 0, c='black', marker='o', s=1, label='FREQ : ' + str(freq))
+        plt.scatter(5000, 0, c='black', marker='o', s=1, label='DCY : ' + str(rcy))
         plt.legend()
-    #################cursors#################
+    ################# cursors #################
     if 'cursor' in arg:
         a = instr.ask('CURsor?').split(';')
         if 'H' in arg:
@@ -144,14 +155,14 @@ def TDSwfm(ip, channel, arg, wtrace):
             plt.scatter(5000, 0, c='black', marker='o', s=1, label='ΔV (V) : ' + str(vd))
             plt.scatter(5000, 0, c='black', marker='o', s=1, label='ΔV (s) : ' + str(vdt))
         plt.legend()
-    ###############design oscillo############
+    ############### design oscillo ############
     x1, y1 = [0, 10000], [0, 0]
     x2, y2 = [5000, 5000], [(-4*Vdiv), (4*Vdiv)]
-    plt.plot(x1, y1, c = 'black', linewidth=2)
-    plt.plot(x2, y2, c = 'black', linewidth=2)
-    plt.scatter(0, ((0+Zpos)*Vdiv), c = 'red', marker = '>', s = 500) # V 0 pos
-    plt.scatter(Hpos, (4 * Vdiv), c='red', marker='v', s=500) # H 0 pos
-    #############design oscillo2###############
+    plt.plot(x1, y1, c='black', linewidth=2)
+    plt.plot(x2, y2, c='black', linewidth=2)
+    plt.scatter(0, ((0+Zpos)*Vdiv), c='red', marker='>', s=500)  # V 0 pos
+    plt.scatter(Hpos, (4 * Vdiv), c='red', marker='v', s=500)  # H 0 pos
+    ############# design oscillo2 ###############
     plt.xticks([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000])
     plt.yticks(np.arange(-Vdiv * 4, Vdiv * 5, step=Vdiv))
     plt.gca().axes.xaxis.set_ticklabels([])
@@ -163,16 +174,17 @@ def TDSwfm(ip, channel, arg, wtrace):
     plt.ylabel(str(Vdiv) + ' V/Div')
     plt.title('Selected channel : ' + channel, loc='left')
     plt.tight_layout()
-    #ax = plt.axes()               # Uncomment both to change the background color
-    #ax.set_facecolor('silver')    # Uncomment both to change the background color
-    ###############plot##############
-    plt.plot(x, y, c = 'cornflowerblue')
+    # ax = plt.axes()               # Uncomment both to change the background color
+    # ax.set_facecolor('silver')    # Uncomment both to change the background color
+    ############### plot ##############
+    plt.plot(x, y, c='cornflowerblue')
 
     instr.close()
     return plt
 
+
 def TDSwfm_live(ip, channel, arg, trace):
-    """Same as *TDSwfm()* but it creates a live feed with a refresh rate of ~1.15 sec (0.8670 fps).
+    """ Same as *TDSwfm()* but it creates a live feed with a refresh rate of ~1.15 sec (0.8670 fps).
 
     :param ip: IP Address of the oscilloscope
     :type ip: str
@@ -194,6 +206,7 @@ def TDSwfm_live(ip, channel, arg, trace):
 
     .. note:: Can only show one channel at a time. Requires NumPy and OpenCV
     """
+
     while True:
         TDSwfm(ip, channel, arg, trace).savefig('TektroPyx_live.png')
         img = cv2.imread("TektroPyx_live.png")
@@ -203,8 +216,9 @@ def TDSwfm_live(ip, channel, arg, trace):
             break
     cv2.destroyAllWindows()
 
+
 def TDSwfm_comp(cap1, cap2):
-    """Show the comparison between two screenshots taken with TDSwfm().savefig(). It also saves the result as "TektroPyx_comp.jpg" in current path.
+    """ Show the comparison between two screenshots taken with TDSwfm().savefig(). It also saves the result as "TektroPyx_comp.jpg" in current path.
 
     :param cap1: Main image
     :type cap1: str
@@ -224,9 +238,11 @@ def TDSwfm_comp(cap1, cap2):
     .. note:: Requires NumPy and OpenCV. Be careful with the vertical scale and the time base.
     .. warning:: Changing colors will break this function, as it uses mask to detect a given color.
     """
+
     ###############
-    lower = np.array([99, 137, 197]) # If main color (waveform color) has been changed, lower & upper has to be changed
-    upper = np.array([119, 157, 277])# in accordance with chosen color
+    # If main color (waveform color) has been changed, lower & upper has to be changed
+    lower = np.array([99, 137, 197])
+    upper = np.array([119, 157, 277])  # in accordance with chosen color
     ###############
 
     frame = cv2.imread(cap1, cv2.IMREAD_UNCHANGED)
@@ -245,8 +261,9 @@ def TDSwfm_comp(cap1, cap2):
     cv2.imwrite('TektroPyx_comp.jpg', frame)
     cv2.waitKey(0)
 
+
 def TDSwfm_hist(ntrace):
-    """Return the waveform saved in the *trace_xxx.txt* given in argument
+    """ Return the waveform saved in the *trace_xxx.txt* given in argument
 
     :param ntrace: title of .txt file
     :type ntrace: str
@@ -267,6 +284,7 @@ def TDSwfm_hist(ntrace):
 
     .. note:: Please, refer to TDSwfm() as it's basically the same function
     """
+
     param = open(str(ntrace) + ".txt", "r")
     trace = param.readlines(-1)
     param.close()
@@ -292,14 +310,14 @@ def TDSwfm_hist(ntrace):
         x.append(i)
         i += 1
 
-    ###############design oscillo############
+    ############### design oscillo############
     x1, y1 = [0, 10000], [0, 0]
     x2, y2 = [5000, 5000], [(-4 * Vdiv), (4 * Vdiv)]
     plt.plot(x1, y1, c='black', linewidth=2)
     plt.plot(x2, y2, c='black', linewidth=2)
     plt.scatter(0, ((0 + Zpos) * Vdiv), c='red', marker='>', s=500)  # V 0 pos
     plt.scatter(Hpos, (4 * Vdiv), c='red', marker='v', s=500)  # H 0 pos
-    #############design oscillo2###############
+    ############# design oscillo2###############
     plt.xticks([0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000])
     plt.yticks(np.arange(-Vdiv * 4, Vdiv * 5, step=Vdiv))
     plt.gca().axes.xaxis.set_ticklabels([])
@@ -313,13 +331,14 @@ def TDSwfm_hist(ntrace):
     plt.tight_layout()
     # ax = plt.axes()               # Uncomment both to change the background color
     # ax.set_facecolor('silver')    # Uncomment both to change the background color
-    ###############plot##############
+    ############### plot##############
     plt.plot(x, y, c='cornflowerblue')
 
     return plt
 
+
 def TDSwfm_meas(ip, mes):
-    """Return the wanted measure
+    """ Return the wanted measure
 
     :param ip: IP Address of the oscilloscope
     :type ip: str
@@ -327,59 +346,57 @@ def TDSwfm_meas(ip, mes):
     :type mes: str
     :return: *measure*
     :rtype: str
-    
+
     .. note:: Available measures : AMPlitude, AREa, BURst, CARea, CMEan, CRMs, DELAY, FALL,
         FREQuency, HIGH, LOW, MAXimum, MEAN, MINImum, NDUty, NOVershoot, NWIdth, PDUty,
         PERIod, PHASE, PK2pk, POVershoot, PWIdth, RISe, RMS
     """
-    #########
-    #AMPlitude | AREa | BURst | CARea | CMEan |
-    #CRMs | DELAY | FALL | FREQuency | HIGH | LOW |
-    #MAXimum | MEAN | MINImum | NDUty | NOVershoot |
-    #NWIdth | PDUty | PERIod | PHASE | PK2pk | POVershoot |
-    #PWIdth | RISe | RMS
-    #########
+
     try:
-        instr =  vxi11.Instrument(ip)
+        instr = vxi11.Instrument(ip)
         EOL = '\n'
         instr.write('measurement:immed:type ' + mes)
         a = instr.ask('measurement:immed:value?'+EOL)
         instr.close()
         return a
-    except:
-        return 'error'
+    except Exception as e:
+        return e
+
 
 def TDSwfm_trig(ip):
-    """Return the trigger state
+    """ Return the trigger state
 
     :param ip: IP Address of the oscilloscope
     :type ip: str
     :return: *trigger* state
     :rtype: str
     """
+
     try:
-        instr =  vxi11.Instrument(ip)
+        instr = vxi11.Instrument(ip)
         EOL = '\n'
         a = instr.ask('trigger:state?'+EOL)
         instr.close()
         return a
-    except:
-        return 'error'
+    except Exception as e:
+        return e
+
 
 def CMD_VXI(ip, cmd):
-    """To test any command using VXI-11 protocol
+    """ To test any command using VXI-11 protocol
 
-        :param ip: IP Address
-        :type ip: str
-        :param cmd: Command to send
-        :type cmd: str
-        :return: *response* if query, otherwise *None*
-        :rtype: str
+    :param ip: IP Address
+    :type ip: str
+    :param cmd: Command to send
+    :type cmd: str
+    :return: *response* if query, otherwise *None*
+    :rtype: str
 
-        .. warning:: *EOL* is a *line feed* by default and **can only be changed in source**
-        """
+    .. warning:: *EOL* is a *line feed* by default and **can only be changed in source**
+    """
+
     try:
-        instr =  vxi11.Instrument(ip)
+        instr = vxi11.Instrument(ip)
         EOL = '\n'
         if '?' in cmd:
             a = instr.ask(cmd+EOL)
@@ -387,5 +404,5 @@ def CMD_VXI(ip, cmd):
             a = instr.write(cmd+EOL)
         instr.close()
         return a
-    except:
-        return 'error'
+    except Exception as e:
+        return e
